@@ -1,6 +1,7 @@
 import os
 import sys
 from pyspark.sql import SparkSession
+from pathlib import Path
 
 # Spark needs to know which Python to use on Windows
 os.environ["PYSPARK_PYTHON"] = sys.executable
@@ -13,9 +14,23 @@ spark = SparkSession.builder \
     .config("spark.driver.memory", "4g") \
     .getOrCreate()
 
-# Create a simple DataFrame
-data = [("Alice", 30), ("Bob", 25), ("Carol", 35)]
-df = spark.createDataFrame(data, ["name", "age"])
-df.show()
+CUR = Path(__file__).parent
 
-spark.stop()
+ROOT = CUR.parent
+
+# Paths to your folders
+BRONZE = ROOT / "bronze"
+SILVER = CUR / "silver"
+
+#Read files into df
+movies_df = spark.read.csv(str(BRONZE / "movies_metadata.csv"), header=True,inferSchema=True)
+movies_df.show()
+
+credits_df = spark.read.csv(str(BRONZE / "credits.csv"), header=True,inferSchema=True)
+credits_df.show()
+
+keywords_df = spark.read.csv(str(BRONZE / "keywords.csv"), header=True,inferSchema=True)
+keywords_df.show()
+
+ratings_df = spark.read.csv(str(BRONZE / "ratings_small.csv"), header=True,inferSchema=True)
+ratings_df.show()
