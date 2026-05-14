@@ -1,6 +1,9 @@
 import os
 import sys
 from pyspark.sql import SparkSession
+from pyspark.sql import DataFrame
+from pyspark.sql.functions import * 
+from pyspark.sql.types import StringType
 from pathlib import Path
 
 # Spark needs to know which Python to use on Windows
@@ -22,6 +25,24 @@ ROOT = CUR.parent
 BRONZE = ROOT / "bronze"
 SILVER = CUR / "silver"
 
+# Cleaning functions (Bronze → Silver)
+def clean_near_dup_rows(movies_df: DataFrame) -> DataFrame:
+    
+    # Get the string columns
+    string_cols = [column.name for column in movies_df.schema if column.dataType == StringType()]
+
+    # Trim each string column
+    for c in string_cols:
+
+        # Trim whitespace and remove trailing punctuation
+        movies_df = movies_df.withColumn(c, regexp_replace(col(c), r"^\W+|\W+$", ""))
+       
+        # Fix casing
+        movies_df = movies_df.withColumn(c, initcap(col(c)))
+        
+    
+    return movies_df
+
 #Read files into df
 movies_df = spark.read.csv(str(BRONZE / "movies_metadata.csv"), header=True,inferSchema=True)
 movies_df.show()
@@ -34,3 +55,9 @@ keywords_df.show()
 
 ratings_df = spark.read.csv(str(BRONZE / "ratings_small.csv"), header=True,inferSchema=True)
 ratings_df.show()
+
+
+no_near_dup_movies_df = clean_near_dup_rows(movies_df)
+no_near_dup_movies_df.show()
+
+
