@@ -5,6 +5,7 @@ from pyspark.sql.functions import col, trim, lower,coalesce,array, regexp_replac
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StringType
 from pathlib import Path
+from jonathan_functions import clean_null_movies,clean_null_ratings,clean_null_keywords,clean_null_credits
 
 # Spark needs to know which Python to use on Windows
 os.environ["PYSPARK_PYTHON"] = sys.executable
@@ -63,15 +64,13 @@ ratings_df = spark.read.csv(str(BRONZE / "ratings_small.csv"), header=True,schem
 
 
 #Dropped all rows missing essential columns, weaviate can handle other nulls
-movies_df1 = movies_df.dropna(subset=["id", "imdb_id", "overview","release_date","adult"]) \
-        .dropna(subset=["title", "original_title"], how="all")\
+movies_df1 = clean_null_movies(movies_df)
 
-credits_df1 = credits_df.dropna(subset=["id"]) \
-        .dropna(subset=["cast","crew"], how="all")
+credits_df1 = clean_null_credits(credits_df)
 
-keywords_df1 = keywords_df.dropna(subset=["id","keywords"])
+keywords_df1 = clean_null_keywords(keywords_df)
 
-ratings_df1 = ratings_df.dropna(subset=["userId","movieId","rating"])
+ratings_df1 = clean_null_ratings(ratings_df)
 
 #Fixed casing, removed whitespace and trailing punctuation
 movies_df2 = clean_near_dup_rows(movies_df1)

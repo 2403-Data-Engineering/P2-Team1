@@ -47,14 +47,19 @@ ratings_df = spark.read.csv(str(BRONZE / "ratings_small.csv"), header=True,schem
 def clean_null_movies(df: DataFrame) -> DataFrame:
     return df.dropna(subset=["id", "imdb_id", "overview","release_date","adult"]) \
         .dropna(subset=["title", "original_title"], how="all")
-    
 
+def clean_null_credits(df: DataFrame) -> DataFrame:
+    return df.dropna(subset=["id"]) \
+            .dropna(subset=["cast","crew"], how="all")
+
+def clean_null_keywords(df: DataFrame) -> DataFrame:
+    return df.dropna(subset=["id","keywords"])
+
+def clean_null_ratings(df: DataFrame) -> DataFrame:
+    return df.dropna(subset=["userId","movieId","rating"])
 #Dropped all rows missing essential columns, weaviate can handle other nulls
-movies_df1 = clean_null_movies(movies_df)
-movies_df1.show()
-credits_df1 = credits_df.dropna(subset=["id"]) \
-        .dropna(subset=["cast","crew"], how="all")
-
-keywords_df1 = keywords_df.dropna(subset=["id","keywords"])
-
-ratings_df1 = ratings_df.dropna(subset=["userId","movieId","rating"])
+if __name__ == "__main__":
+    movies_df1 = clean_null_movies(movies_df)
+    credits_df1 = clean_null_credits(credits_df)
+    keywords_df1 = clean_null_keywords(keywords_df)
+    ratings_df1 = clean_null_ratings(ratings_df)
