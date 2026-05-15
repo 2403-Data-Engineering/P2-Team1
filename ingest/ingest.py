@@ -5,7 +5,7 @@ from pyspark.sql.functions import col, trim, lower,coalesce,array, regexp_replac
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StringType
 from pathlib import Path
-from jonathan_functions import clean_null_movies,clean_null_ratings,clean_null_keywords,clean_null_credits, clean_date
+from jonathan_functions import clean_null_movies,clean_null_ratings,clean_null_keywords,clean_null_credits, clean_date_format
 
 # Spark needs to know which Python to use on Windows
 os.environ["PYSPARK_PYTHON"] = sys.executable
@@ -81,8 +81,8 @@ keywords_df2 = clean_near_dup_rows(keywords_df1)
 
 ratings_df2 = clean_near_dup_rows(ratings_df1)
 
-#4. Parse date 
-movies_df4 = clean_date(movies_df2)
+#4. Parse date format
+movies_df4 = clean_date_format(movies_df2)
 
 
 

@@ -58,7 +58,7 @@ def clean_null_keywords(df: DataFrame) -> DataFrame:
 def clean_null_ratings(df: DataFrame) -> DataFrame:
     return df.dropna(subset=["userId","movieId","rating"])
 
-def clean_date(df: DataFrame) -> DataFrame:
+def clean_date_format(df: DataFrame) -> DataFrame:
     return df.withColumn("release_date",
     coalesce(
         try_to_date(col("release_date"), "yyyy-MM-dd"),
@@ -76,6 +76,6 @@ if __name__ == "__main__":
     keywords_df1 = clean_null_keywords(keywords_df)
     ratings_df1 = clean_null_ratings(ratings_df)
 
-    movies_df4 = clean_date(movies_df1)
+    movies_df4 = clean_date_format(movies_df1)
     
     
