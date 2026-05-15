@@ -5,7 +5,7 @@ from pyspark.sql.functions import col, trim, lower,coalesce,array, regexp_replac
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StringType
 from pathlib import Path
-from jonathan_functions import clean_null_movies,clean_null_ratings,clean_null_keywords,clean_null_credits
+from jonathan_functions import clean_null_movies,clean_null_ratings,clean_null_keywords,clean_null_credits, clean_date
 
 # Spark needs to know which Python to use on Windows
 os.environ["PYSPARK_PYTHON"] = sys.executable
@@ -63,7 +63,7 @@ ratings_df = spark.read.csv(str(BRONZE / "ratings_small.csv"), header=True,schem
 
 
 
-#Dropped all rows missing essential columns, weaviate can handle other nulls
+#1. Clean nulls, dropped all rows missing essential columns, weaviate can handle other nulls
 movies_df1 = clean_null_movies(movies_df)
 
 credits_df1 = clean_null_credits(credits_df)
@@ -80,6 +80,10 @@ credits_df2 = clean_near_dup_rows(credits_df1)
 keywords_df2 = clean_near_dup_rows(keywords_df1)
 
 ratings_df2 = clean_near_dup_rows(ratings_df1)
+
+#4. Parse date 
+movies_df4 = clean_date(movies_df2)
+
 
 
 

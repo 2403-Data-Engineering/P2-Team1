@@ -1,7 +1,7 @@
 import os
 import sys
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, trim, lower,coalesce,array, regexp_replace, initcap
+from pyspark.sql.functions import col, trim, lower,coalesce,array, regexp_replace, initcap, to_date,try_to_date
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StringType
 from pathlib import Path
@@ -57,6 +57,18 @@ def clean_null_keywords(df: DataFrame) -> DataFrame:
 
 def clean_null_ratings(df: DataFrame) -> DataFrame:
     return df.dropna(subset=["userId","movieId","rating"])
+
+def clean_date(df: DataFrame) -> DataFrame:
+    return df.withColumn("release_date",
+    coalesce(
+        try_to_date(col("release_date"), "yyyy-MM-dd"),
+        try_to_date(col("release_date"), "MM/dd/yyyy"),
+        try_to_date(col("release_date"), "dd-MM-yyyy"),
+        try_to_date(col("release_date"), "yyyy.MM.dd"),
+        try_to_date(col("release_date"), "MMMM dd, yyyy")
+        )
+    ).filter(col("release_date").isNotNull())
+
 #Dropped all rows missing essential columns, weaviate can handle other nulls
 if __name__ == "__main__":
     movies_df1 = clean_null_movies(movies_df)
@@ -64,4 +76,6 @@ if __name__ == "__main__":
     keywords_df1 = clean_null_keywords(keywords_df)
     ratings_df1 = clean_null_ratings(ratings_df)
 
-    print(movies_df1.filter(col("release_date").isNull()).count())
+    movies_df4 = clean_date(movies_df1)
+    
+    
