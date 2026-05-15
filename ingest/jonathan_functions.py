@@ -26,11 +26,11 @@ BRONZE = ROOT / "bronze"
 SILVER = CUR / "silver"
 
 #Read files into df
-movie_schema = """id INT,imdb_id INT,title STRING,original_title STRING,overview STRING,tagline STRING,
-release_date DATE,runtime INT,budget DECIMAL(15,2),revenue DECIMAL(15,2),popularity DECIMAL(6,2),
-vote_average DECIMAL(5,2),vote_count INT,genres STRING,production_companies STRING,production_countries STRING,
-spoken_languages STRING,belongs_to_collection STRING,homepage STRING,poster_path STRING,backdrop_path STRING,
-status STRING,adult BOOLEAN,video BOOLEAN"""
+movie_schema = """adult BOOLEAN,belongs_to_collection STRING,budget DECIMAL(15,2),genres STRING,
+homepage STRING,id INT,imdb_id STRING,original_language STRING,original_title STRING,overview STRING,
+popularity FLOAT,poster_path STRING,production_companies STRING,production_countries STRING,
+release_date STRING,revenue DECIMAL(15,2),runtime INT,spoken_languages STRING,status STRING,
+tagline STRING,title STRING,video BOOLEAN,vote_average FLOAT,vote_count INT"""
 movies_df = spark.read.csv(str(BRONZE / "movies_metadata.csv"), header=True,schema=movie_schema)
 
 credits_schema = "id INT, cast STRING, crew STRING"
@@ -63,3 +63,5 @@ if __name__ == "__main__":
     credits_df1 = clean_null_credits(credits_df)
     keywords_df1 = clean_null_keywords(keywords_df)
     ratings_df1 = clean_null_ratings(ratings_df)
+
+    print(movies_df1.filter(col("release_date").isNull()).count())
